@@ -1,4 +1,5 @@
-# ROCM fork for Speedy-Splat. Tested in wsl ubuntu on a windows device. So far no functional issues have been found.
+# ROCM fork for Speedy-Splat. 
+Tested in wsl ubuntu on a windows device. So far no functional issues have been found.
 
 
 # Speedy-Splat: Fast 3D Gaussian Splatting with Sparse Pixels and Sparse Primitives
