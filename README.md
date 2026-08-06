@@ -1,3 +1,6 @@
+# ROCM fork for Speedy-Splat. Tested in wsl ubuntu on a windows device. So far no functional issues have been found.
+
+
 # Speedy-Splat: Fast 3D Gaussian Splatting with Sparse Pixels and Sparse Primitives
 
 [Alex Hanson](https://www.cs.umd.edu/~hanson/), [Allen Tu](https://tuallen.github.io), [Geng Lin](https://www.cs.umd.edu/people/geng), [Vasu Singla](https://vasusingla.github.io/), [Matthias Zwicker](https://www.cs.umd.edu/~zwicker/), [Tom Goldstein](https://www.cs.umd.edu/~tomg/)
