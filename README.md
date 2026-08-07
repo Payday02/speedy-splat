@@ -79,7 +79,3 @@ bash compute_scene_metrics.sh
 
 Metrics are written to `SCENE_MODEL_PATH/<train|test>/ours_<iteration>/metrics.csv`. If `ONLY_RAW_KERNEL_TIMES=true`, a `kernel_times.csv` is written instead, recording raw render time in milliseconds per image, repeated 20 times.
 
-
-## Funding and Acknowledgments
-
-This work was made possible by the IARPA WRIVA Program, the ONR MURI program, and DARPA TIAMAT. Commercial support was provided by Capital One Bank, the Amazon Research Award program, and Open Philanthropy. Further support was provided by the National Science Foundation (IIS-2212182), and by the NSF TRAILS Institute (2229885). Zwicker was additionally supported by the National Science Foundation (IIS-2126407).
