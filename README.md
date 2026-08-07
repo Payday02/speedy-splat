@@ -79,31 +79,3 @@ bash compute_scene_metrics.sh
 
 Metrics are written to `SCENE_MODEL_PATH/<train|test>/ours_<iteration>/metrics.csv`. If `ONLY_RAW_KERNEL_TIMES=true`, a `kernel_times.csv` is written instead, recording raw render time in milliseconds per image, repeated 20 times.
 
-## Results
-
-<img src="assets/speedy_splat_comparison.png" alt="Speedy Splat Comparison"/>
-
-*3D Gaussian Splatting (3D-GS) is a recent 3D scene reconstruction technique that enables real-time rendering of novel views by modeling scenes as parametric point clouds of differentiable 3D Gaussians. However, its rendering speed and model size still present bottlenecks, especially in resource-constrained settings. Speedy-Splat optimizes the rendering pipeline to precisely localize Gaussians and introduces a novel pruning technique integrated into training, accelerating average rendering speed by 6.71x across Mip-NeRF 360, Tanks & Temples, and Deep Blending scenes with 10.6x fewer primitives than 3D-GS.*
-
-## BibTeX
-
-```
-@InProceedings{HansonSpeedy,
-    author    = {Hanson, Alex and Tu, Allen and Lin, Geng and Singla, Vasu and Zwicker, Matthias and Goldstein, Tom},
-    title     = {Speedy-Splat: Fast 3D Gaussian Splatting with Sparse Pixels and Sparse Primitives},
-    booktitle = {Proceedings of the Computer Vision and Pattern Recognition Conference (CVPR)},
-    month     = {June},
-    year      = {2025},
-    pages     = {21537-21546},
-    url       = {https://speedysplat.github.io/}
-}
-```
-
-## Related Work
-
-- [PUP-3DGS](https://pup3dgs.github.io/) (CVPR 2025) — prunes 90% of primitives from any pretrained 3D-GS model using a mathematically principled sensitivity score, more than tripling rendering speed while retaining higher visual fidelity at a substantially higher compression ratio.
-- [SpeeDe3DGS](https://speede3dgs.github.io/) — boosts DeformableGS rendering speed from 20 to 276 FPS using temporal sensitivity pruning and groupwise SE(3) motion distillation, preserving the image quality of per-Gaussian neural motion.
-
-## Funding and Acknowledgments
-
-This work was made possible by the IARPA WRIVA Program, the ONR MURI program, and DARPA TIAMAT. Commercial support was provided by Capital One Bank, the Amazon Research Award program, and Open Philanthropy. Further support was provided by the National Science Foundation (IIS-2212182), and by the NSF TRAILS Institute (2229885). Zwicker was additionally supported by the National Science Foundation (IIS-2126407).
