@@ -42,9 +42,11 @@ Brief version — see AMD's [WSL install docs](https://rocm.docs.amd.com/project
    ```
    Set these before every training/eval run (e.g. in your shell profile) until upstream fixes the underlying MIOpen issue.
 
-### Known cosmetic issue
+### Fixed: timer instrumentation was broken (now resolved)
 
-Speedy-splat's own kernel-timing instrumentation (`kernel_times`, and the "Training Time"/FPS lines printed during training) reports negative values under this ROCm build — almost certainly a CUDA-`Event`-based timer that doesn't translate cleanly through HIP on this driver stack. This doesn't affect training correctness (loss, PSNR, and SSIM all improve normally over training) — only the self-reported speed metrics are wrong. Not yet root-caused.
+Speedy-splat's own kernel-timing instrumentation ("Training Time" and per-image FPS during training/eval) previously reported negative or nonsensical values under this ROCm build. Root cause: both the C++ rasterizer's overall-timer (`rasterizer_impl.cu`) and Python's per-iteration timer (`train.py`) used CUDA event-based timing (`cudaEventElapsedTime()` / `torch.cuda.Event().elapsed_time()`), which produces unreliable results on this ROCm/HIP/WSL2 stack — the same underlying issue MIOpen's own internal convolution-algorithm benchmarking hits (`"Invalid elapsed time detected"`, see the MIOpen workaround above). Both call sites were correctly synchronized per CUDA's rules; the timer primitive itself is unreliable on this platform, not a logic bug in either file.
+
+Fixed by replacing GPU event timers with host-side wall-clock timing (`std::chrono` in C++, `time.perf_counter()` in Python), bracketed by explicit `cudaDeviceSynchronize()`/`torch.cuda.synchronize()` calls where needed. The main training loop's per-iteration event pair was removed entirely rather than fixed in place, since only cumulative elapsed time is actually reported — a small additional overhead reduction on top of the fix, since no per-iteration GPU event recording is needed anymore.
 
 ## Setup (general)
 
