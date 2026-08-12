@@ -11,6 +11,7 @@
 
 import os
 import torch
+import time
 from random import randint
 from utils.loss_utils import l1_loss, ssim
 from gaussian_renderer import render, network_gui
@@ -46,11 +47,9 @@ def score_func(view, gaussians, pipeline, background, scores):
 
 def prune(scene, gaussians, pipe, background, prune_ratio):
 
-    iter_start = torch.cuda.Event(enable_timing = True)
-    iter_end = torch.cuda.Event(enable_timing = True)
     torch.cuda.reset_peak_memory_stats()
-
-    iter_start.record()
+    torch.cuda.synchronize()
+    iter_start = time.perf_counter()
 
     with torch.enable_grad():
         pbar = tqdm(
@@ -65,12 +64,13 @@ def prune(scene, gaussians, pipe, background, prune_ratio):
 
     gaussians.prune_gaussians(prune_ratio, scores)
 
-    iter_end.record()
+    torch.cuda.synchronize()
+    iter_end = time.perf_counter()
 
     # Track peak memory usage (in bytes) and convert to MB
     peak_memory_allocated = torch.cuda.max_memory_allocated() / (1024 ** 2)
     peak_memory_reserved = torch.cuda.max_memory_reserved() / (1024 ** 2)
-    time_ms = iter_start.elapsed_time(iter_end)
+    time_ms = (iter_end - iter_start) * 1000
     time_min = time_ms / 60_000
 
     return {
@@ -92,9 +92,7 @@ def training(dataset, opt, pipe, testing_iterations, visualize_iterations, savin
     bg_color = [1, 1, 1] if dataset.white_background else [0, 0, 0]
     background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
 
-    train_time_ms = 0
-    iter_start = torch.cuda.Event(enable_timing = True)
-    iter_end = torch.cuda.Event(enable_timing = True)
+    training_start = time.perf_counter()
 
     prune_time_min = 0
     prune_peak_memory_allocated = 0
@@ -120,8 +118,6 @@ def training(dataset, opt, pipe, testing_iterations, visualize_iterations, savin
             except Exception as e:
                 network_gui.conn = None
         torch.cuda.reset_peak_memory_stats()
-        iter_start.record()
-
         gaussians.update_learning_rate(iteration)
 
         # Every 1000 its we increase the levels of SH up to a maximum degree
@@ -144,8 +140,6 @@ def training(dataset, opt, pipe, testing_iterations, visualize_iterations, savin
         Ll1 = l1_loss(image, gt_image)
         loss = (1.0 - opt.lambda_dssim) * Ll1 + opt.lambda_dssim * (1.0 - ssim(image, gt_image))
         loss.backward()
-
-        iter_end.record()
         # Track peak memory usage (in bytes) and convert to MB
         peak_memory_allocated = torch.cuda.max_memory_allocated() / (1024 ** 2)
         peak_memory_reserved = torch.cuda.max_memory_reserved() / (1024 ** 2)
@@ -214,9 +208,8 @@ def training(dataset, opt, pipe, testing_iterations, visualize_iterations, savin
 
 
             # Log and save
-            iter_time = iter_start.elapsed_time(iter_end)
-            train_time_ms += iter_time
-            train_time_min = train_time_ms / 60_000
+            iter_time = 0.0  # unused placeholder (was GPU event timing, unreliable on this ROCm build)
+            train_time_min = (time.perf_counter() - training_start) / 60
 
             training_report(
                 tb_writer, iteration, Ll1, loss,
